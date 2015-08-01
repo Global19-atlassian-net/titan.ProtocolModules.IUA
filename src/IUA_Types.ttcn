@@ -1,0 +1,736 @@
+/******************************************************************************
+* Copyright (c) 2005, 2015  Ericsson AB
+* All rights reserved. This program and the accompanying materials
+* are made available under the terms of the Eclipse Public License v1.0
+* which accompanies this distribution, and is available at
+* http://www.eclipse.org/legal/epl-v10.html
+*
+* Contributors:
+* Laszlo Farkas
+* Attila Balasko
+* Gabor Bettesch
+* Gabor Szalai
+* Istvan Sandor
+******************************************************************************/
+//
+//  File:		IUA_Types.ttcn
+//  Description:	Definition of IUA protocol
+//  Rev:		R5A
+//  Prodnr:             CNL 113 439
+///////////////////////////////////////////////
+module IUA_Types
+{
+
+import from General_Types all; 
+
+//+++++++++++++++++++++++++++++++
+//  External encoding/decoding functions
+//+++++++++++++++++++++++++++++++
+external function enc_PDU_IUA(in PDU_IUA pdu) return octetstring
+ with { extension "prototype(convert) encode(RAW)" };
+external function dec_PDU_IUA(in octetstring stream) return PDU_IUA
+ with { extension "prototype(convert) decode(RAW)" };
+external function dec_PDU_IUA_backtrack(in octetstring stream, out PDU_IUA pdu) return integer
+ with { extension "prototype(backtrack) decode(RAW)" }
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++      
+// IUA PARAMETER VALUES
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type octetstring IUA_OCT0_255 length (0..255);
+
+type record of  LIN4_BO_LAST IUA_IF_ID_range  with { variant ""};
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++      
+// IUA PARAMETERS
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+//0001 Interface Identifier (integer)
+type record IUA_InterfaceID_integer_value 
+{
+  OCT2          tag,
+  LIN2_BO_LAST  lengthInd,
+  LIN4_BO_LAST  iF_ID_value 
+} with { variant (lengthInd) "LENGTHTO(tag,lengthInd,iF_ID_value)";
+         variant "PRESENCE (tag = '0001'O)";
+       }
+
+type record IUA_InterfaceID_integer_values 
+{
+  OCT2          tag,
+  LIN2_BO_LAST  lengthInd,
+  IUA_IF_ID_range  iF_ID_values 
+} with { variant (lengthInd) "LENGTHTO(tag,lengthInd,iF_ID_values)";
+         variant "PRESENCE (tag = '0001'O)";
+       }
+
+//0003 Interface Identifier (text)
+type record IUA_InterfaceID_text 
+{
+  OCT2          tag,
+  LIN2_BO_LAST  lengthInd,
+  charstring    iF_ID_Text 
+} with { variant "PRESENCE (tag = '0003'O)";
+         variant (lengthInd) "LENGTHTO(tag,lengthInd,iF_ID_Text)";
+         variant (iF_ID_Text) "BYTEORDER(last)";
+         variant "PADDING(dword32)";
+       }
+
+//0004 INFO String
+type record IUA_Info_String
+{
+  OCT2          tag,
+  LIN2_BO_LAST  lengthInd,
+  IUA_OCT0_255  infoString 
+} with { variant "PRESENCE (tag = '0004'O)";
+         variant (lengthInd) "LENGTHTO(tag,lengthInd,infoString)";
+         variant "PADDING(dword32)";
+       }
+
+//0005 DLCI
+type record IUA_DLCI
+{
+  OCT2          tag,
+  LIN2_BO_LAST  lengthInd,
+  BIT1          ext_sapi     ('0'B),
+  BIT1          command_response,  //labelled 'SPR' in the RFC 
+  BIT6          sAPI,
+  BIT1          ext_tei     ('1'B),
+  BIT7          tEI,
+  OCT2          spare     ('0000'O)
+} with { variant (lengthInd) "LENGTHTO(tag,lengthInd,ext_sapi,command_response,
+                                       sAPI,ext_tei,tEI,spare)";
+         variant "PRESENCE (tag = '0005'O)";
+       }
+
+//0007 Diagnostic Information
+type record IUA_Diagnostic_information
+{
+  OCT2         tag,
+  LIN2_BO_LAST lengthInd,
+  octetstring  diagnosticInformation
+} with { variant (lengthInd) "LENGTHTO(tag,lengthInd,diagnosticInformation)";
+         variant "PADDING(dword32)";
+         variant "PRESENCE (tag = '0007'O)";
+       }
+
+//0008 Interface Identifier range
+type record IUA_InterfaceID_integer_range
+{
+  OCT2             tag,
+  LIN2_BO_LAST     lengthInd,
+  IUA_IF_ID_range  iF_ID_range
+} with { variant (lengthInd) "LENGTHTO(tag,lengthInd,iF_ID_range)";
+          variant "PRESENCE (tag = '0008'O)";
+       }
+
+//0009 Heartbeat data
+type record IUA_Heartbeat_Data
+{
+  OCT2         tag,
+  LIN2_BO_LAST lengthInd,
+  octetstring  heartbeat_Data
+} with { variant (lengthInd) "LENGTHTO(tag,lengthInd,heartbeat_Data)";
+         variant "PADDING(dword32)";
+          variant "PRESENCE (tag = '0009'O)";
+       }
+
+//000B Traffic Mode type
+type record IUA_Traffic_Mode_Type
+{
+  OCT2         tag,
+  LIN2_BO_LAST lengthInd,
+  OCT4         trafficModeType
+} with { variant (lengthInd) "LENGTHTO (tag,lengthInd,trafficModeType)";
+         variant "PRESENCE (tag = '000B'O)";
+       }
+
+//000C Error Code
+type record IUA_Error_Code
+{
+  OCT2         tag,
+  LIN2_BO_LAST lengthInd,
+  OCT4         errorCode
+} with { variant (lengthInd) "LENGTHTO(tag,lengthInd,errorCode)";
+          variant "PRESENCE (tag = '000C'O)";
+       }
+
+//000D Status
+type record IUA_Status
+{
+  OCT2         tag,
+  LIN2_BO_LAST lengthInd,
+  OCT2         statusType,
+  OCT2         statusInformation
+} with { variant (lengthInd) "LENGTHTO(tag,lengthInd,statusType,statusInformation)";
+         variant "PRESENCE (tag = '000D'O)";
+       }
+
+//000E Protocol Data
+type record IUA_Protocol_Data
+{
+  OCT2              tag,
+  LIN2_BO_LAST      lengthInd,
+  IUA_OCT0_255      q931data
+} with { variant (lengthInd) "LENGTHTO(tag,lengthInd,q931data)"; 
+         variant "PADDING(dword32)";
+         variant "PRESENCE (tag = '000E'O)";
+       }
+
+//000F Release Reason
+type record IUA_Release_Reason
+{
+  OCT2           tag,
+  LIN2_BO_LAST   lengthInd,
+  LIN4_BO_LAST   reason
+} with { variant (lengthInd) "LENGTHTO(tag,lengthInd,reason)";
+         variant "PRESENCE (tag = '000F'O)";
+       }
+
+//0010 TEI Status
+type record IUA_TEI_Status
+{
+  OCT2           tag,
+  LIN2_BO_LAST   lengthInd,
+  LIN4_BO_LAST   tEI_status
+} with { variant (lengthInd) "LENGTHTO(tag,lengthInd,tEI_status)"
+         variant "PRESENCE (tag = '0010'O)";
+       }    
+
+//0011 ASP Identifier
+type record IUA_ASP_Identifier
+{
+  OCT2         tag,
+  LIN2_BO_LAST lengthInd,
+  OCT4         aSPIdentifier
+} with { variant (lengthInd) "LENGTHTO(tag,lengthInd,aSPIdentifier)";
+         variant "PRESENCE (tag = '0011'O)";
+       }    
+
+
+//IUA Message Header
+type union IUA_II
+{
+  IUA_InterfaceID_integer_value         interfaceID_integer,
+  IUA_InterfaceID_text                  interfaceID_text
+} with  { variant "TAG (interfaceID_integer, tag = '0001'O;
+                        interfaceID_text,    tag = '0003'O)"
+        }
+
+type record IUA_Message_Header
+{
+  IUA_II    interfaceIdentifier,
+  IUA_DLCI  dLCI
+} with { variant ""}
+
+
+//Combined interface IDs
+type set of IUA_InterfaceID_integer_values IUA_InterfaceID_integer_list
+   with { variant "" };
+type set of IUA_InterfaceID_integer_range IUA_InterfaceID_range_list
+   with { variant "" };
+type set of IUA_InterfaceID_text IUA_InterfaceID_text_list
+   with { variant "" };
+
+type set IUA_InterfaceID
+{
+  IUA_InterfaceID_integer_list interfaceIDs_integer optional,
+  IUA_InterfaceID_range_list   interfaceIDs_range optional,
+  IUA_InterfaceID_text_list    interfaceIDs_text optional
+} with { variant (interfaceIDs_integer,interfaceIDs_range,interfaceIDs_text) 
+                 "REPEATABLE(yes)";};
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+//IUA MESSAGE PDUs
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+
+// IUA_ERR PDU
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_ERR
+{
+  OCT1                       version               ('01'O),
+  OCT1                       reserved              ('00'O),
+  OCT2                       messageClassAndType ('0000'O),
+  LIN4_BO_LAST               messageLength,
+  IUA_ERR_MessageParameters  messageParameters
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,messageParameters)"; 
+       }
+
+type set IUA_ERR_MessageParameters
+{
+  IUA_Error_Code                  error_Code,
+  IUA_Diagnostic_information      diagnostic_information optional
+} with { variant ""}
+
+
+// IUA_NOTIFY
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_NTFY
+{
+  OCT1                         version  ('01'O),
+  OCT1                         reserved ('00'O),
+  OCT2                         messageClassAndType ('0001'O),
+  LIN4_BO_LAST                 messageLength,
+  IUA_NTFY_MessageParameters   messageParameters
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                             messageLength,messageParameters)"; 
+       }
+
+type set IUA_NTFY_MessageParameters
+{
+  IUA_Status                   status,
+  IUA_ASP_Identifier           aSP_Identifier          optional,
+  IUA_InterfaceID              interfaceID             optional,
+  IUA_Info_String              info                    optional
+} with { variant ""}
+ 
+
+// IUA_TEI_STATUS_REQ
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_TEIs_REQ
+{
+  OCT1                         version  ('01'O),
+  OCT1                         reserved ('00'O),
+  OCT2                         messageClassAndType ('0002'O),
+  LIN4_BO_LAST                 messageLength,
+  IUA_Message_Header           header
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                             messageLength,header)"; 
+       }
+
+// IUA_TEI_STATUS_CFM
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_TEIs_CFM
+{
+  OCT1                         version  ('01'O),
+  OCT1                         reserved ('00'O),
+  OCT2                         messageClassAndType ('0003'O),
+  LIN4_BO_LAST                 messageLength,
+  IUA_Message_Header           header,
+  IUA_TEI_Status               status
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                             messageLength,header,status)"; 
+       }
+
+
+// IUA_TEI_STATUS_IND
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_TEIs_IND
+{
+  OCT1                         version  ('01'O),
+  OCT1                         reserved ('00'O),
+  OCT2                         messageClassAndType ('0004'O),
+  LIN4_BO_LAST                 messageLength,
+  IUA_Message_Header           header,
+  IUA_TEI_Status               status
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                             messageLength,header,status)"; 
+       }
+
+
+// IUA_TEI_QUERY_REQ
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_TEIq_REQ
+{
+  OCT1                         version  ('01'O),
+  OCT1                         reserved ('00'O),
+  OCT2                         messageClassAndType ('0005'O),
+  LIN4_BO_LAST                 messageLength,
+  IUA_Message_Header           header
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                             messageLength,header)"; 
+       }
+
+
+//  IUA_ASPUP
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_ASPUP
+{
+  OCT1                         version  ('01'O),
+  OCT1                         reserved ('00'O),
+  OCT2                         messageClassAndType ('0301'O),
+  LIN4_BO_LAST                 messageLength,
+  IUA_ASPUP_MessageParameters  messageParameters
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,messageParameters)"; 
+       }
+
+type set IUA_ASPUP_MessageParameters 
+{
+  IUA_ASP_Identifier aSP_Identifier optional,
+  IUA_Info_String    info_String    optional
+} with { variant ""}
+  
+  
+//IUA_ASPUP_Ack  
+//++++++++++++++++++++++++++++++++++++++++++++++++++  
+type record IUA_ASPUP_Ack  
+{
+  OCT1                             version  ('01'O),
+  OCT1                             reserved ('00'O),
+  OCT2                             messageClassAndType ('0304'O),
+  LIN4_BO_LAST                     messageLength,
+  IUA_ASPUP_Ack_MessageParameters  messageParameters
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,messageParameters)"; 
+       }
+
+type set IUA_ASPUP_Ack_MessageParameters
+{
+  IUA_Info_String   info_String optional
+} with { variant ""}
+     
+     
+//IUA_ASPDN
+//++++++++++++++++++++++++++++++++++++++++++++++++++   
+type record IUA_ASPDN 
+{
+  OCT1                         version  ('01'O),
+  OCT1                         reserved ('00'O),
+  OCT2                         messageClassAndType ('0302'O),
+  LIN4_BO_LAST                 messageLength,
+  IUA_ASPDN_MessageParameters messageParameters
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,messageParameters)"; 
+       }
+
+type set IUA_ASPDN_MessageParameters
+{
+  IUA_Info_String   info_String optional
+} with { variant ""}
+
+
+//IUA_ASPDN_Ack
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_ASPDN_Ack 
+{
+  OCT1                             version  ('01'O),
+  OCT1                             reserved ('00'O),
+  OCT2                             messageClassAndType ('0305'O),
+  LIN4_BO_LAST                     messageLength,
+  IUA_ASPDN_Ack_MessageParameters  messageParameters
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,messageParameters)"; 
+       }
+
+type set IUA_ASPDN_Ack_MessageParameters
+{
+  IUA_Info_String   info_String optional
+} with { variant ""}
+
+ 
+// IUA_BEAT
+//++++++++++++++++++++++++++++++++++++++++++++++++++ 
+type record IUA_BEAT 
+{
+  OCT1                        version  ('01'O),
+  OCT1                        reserved ('00'O),
+  OCT2                        messageClassAndType ('0303'O),
+  LIN4_BO_LAST                messageLength,
+  IUA_BEAT_MessageParameters  messageParameters
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,messageParameters)"; 
+       }
+
+type set IUA_BEAT_MessageParameters
+{
+  IUA_Heartbeat_Data  heartbeat_Data optional
+} with { variant ""}
+
+
+// IUA_BEAT_Ack
+//++++++++++++++++++++++++++++++++++++++++++++++++++ 
+type record IUA_BEAT_Ack 
+{
+  OCT1                            version  ('01'O),
+  OCT1                            reserved ('00'O),
+  OCT2                            messageClassAndType ('0306'O),
+  LIN4_BO_LAST                    messageLength,
+  IUA_BEAT_Ack_MessageParameters  messageParameters
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,messageParameters)"; 
+       }
+
+type set IUA_BEAT_Ack_MessageParameters
+{
+  IUA_Heartbeat_Data  heartbeat_Data optional
+} with { variant ""}
+
+
+// IUA_ASPAC
+//++++++++++++++++++++++++++++++++++++++++++++++++++ 
+type record IUA_ASPAC
+{
+  OCT1                         version  ('01'O),
+  OCT1                         reserved ('00'O),
+  OCT2                         messageClassAndType ('0401'O),
+  LIN4_BO_LAST                 messageLength,
+  IUA_ASPAC_MessageParameters  messageParameters
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,messageParameters)"; 
+       }
+
+type set IUA_ASPAC_MessageParameters
+{
+  IUA_Traffic_Mode_Type    traffic_Mode_Type, 
+  IUA_InterfaceID          interfaceID       optional,
+  IUA_Info_String          info_String       optional
+} with { variant ""}
+
+
+// IUA_ASPAC_Ack
+//++++++++++++++++++++++++++++++++++++++++++++++++++ 
+type record IUA_ASPAC_Ack
+{
+  OCT1                             version  ('01'O),
+  OCT1                             reserved ('00'O),
+  OCT2                             messageClassAndType ('0403'O),
+  LIN4_BO_LAST                     messageLength,
+  IUA_ASPAC_Ack_MessageParameters  messageParameters
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,messageParameters)"; 
+       }
+
+type set IUA_ASPAC_Ack_MessageParameters
+{
+  IUA_Traffic_Mode_Type    traffic_Mode_Type, 
+  IUA_InterfaceID          interfaceID       optional,
+  IUA_Info_String          info_String       optional
+} with { variant ""}
+ 
+
+// IUA_ASPIA
+//++++++++++++++++++++++++++++++++++++++++++++++++++  
+type record IUA_ASPIA
+{ 
+  OCT1                         version  ('01'O),
+  OCT1                         reserved ('00'O),
+  OCT2                         messageClassAndType ('0402'O),
+  LIN4_BO_LAST                 messageLength,
+  IUA_ASPIA_MessageParameters  messageParameters
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,messageParameters)"; 
+       }
+ 
+type set IUA_ASPIA_MessageParameters 
+{
+  IUA_InterfaceID          interfaceID       optional,
+  IUA_Info_String          info_String       optional
+} with { variant ""}
+
+ 
+// IUA_ASPIA_Ack
+//++++++++++++++++++++++++++++++++++++++++++++++++++  
+type record IUA_ASPIA_Ack
+{ 
+  OCT1                             version  ('01'O),
+  OCT1                             reserved ('00'O),
+  OCT2                             messageClassAndType ('0404'O),
+  LIN4_BO_LAST                     messageLength,
+  IUA_ASPIA_Ack_MessageParameters  messageParameters
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,messageParameters)"; 
+       }
+
+type set IUA_ASPIA_Ack_MessageParameters 
+{
+  IUA_InterfaceID          interfaceID       optional,
+  IUA_Info_String          info_String       optional
+} with { variant ""}
+ 
+ 
+// IUA_DATA_REQUEST
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_DATA_REQ
+{
+  OCT1                            version  ('01'O),
+  OCT1                            reserved ('00'O),
+  OCT2                            messageClassAndType ('0501'O),
+  LIN4_BO_LAST                    messageLength,
+  IUA_Message_Header              header,
+  IUA_Protocol_Data               protocolData
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,header,protocolData)"; 
+       }
+
+// IUA_DATA_INDICATION
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_DATA_IND
+{
+  OCT1                            version  ('01'O),
+  OCT1                            reserved ('00'O),
+  OCT2                            messageClassAndType ('0502'O),
+  LIN4_BO_LAST                    messageLength,
+  IUA_Message_Header              header,
+  IUA_Protocol_Data               protocolData
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,header,protocolData)"; 
+       }
+
+// IUA_UNIT_DATA_REQUEST
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_uDATA_REQ
+{
+  OCT1                            version  ('01'O),
+  OCT1                            reserved ('00'O),
+  OCT2                            messageClassAndType ('0503'O),
+  LIN4_BO_LAST                    messageLength,
+  IUA_Message_Header              header,
+  IUA_Protocol_Data               protocolData
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,header,protocolData)"; 
+       }
+
+// IUA_UNIT_DATA_INDICATION
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_uDATA_IND
+{
+  OCT1                            version  ('01'O),
+  OCT1                            reserved ('00'O),
+  OCT2                            messageClassAndType ('0504'O),
+  LIN4_BO_LAST                    messageLength,
+  IUA_Message_Header              header,
+  IUA_Protocol_Data               protocolData
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,header,protocolData)"; 
+       }
+
+// IUA_ESTABLISH_REQUEST
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_EST_REQ
+{
+  OCT1                            version  ('01'O),
+  OCT1                            reserved ('00'O),
+  OCT2                            messageClassAndType ('0505'O),
+  LIN4_BO_LAST                    messageLength,
+  IUA_Message_Header              header
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,header)"; 
+       }
+
+// IUA_ESTABLISH_CONFIRM
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_EST_CFM
+{
+  OCT1                            version  ('01'O),
+  OCT1                            reserved ('00'O),
+  OCT2                            messageClassAndType ('0506'O),
+  LIN4_BO_LAST                    messageLength,
+  IUA_Message_Header              header
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,header)"; 
+       }
+
+// IUA_ESTABLISH_INDICATION
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_EST_IND
+{
+  OCT1                            version  ('01'O),
+  OCT1                            reserved ('00'O),
+  OCT2                            messageClassAndType ('0507'O),
+  LIN4_BO_LAST                    messageLength,
+  IUA_Message_Header              header
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,header)"; 
+       }
+
+// IUA_RELEASE_REQUEST
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_REL_REQ
+{
+  OCT1                            version  ('01'O),
+  OCT1                            reserved ('00'O),
+  OCT2                            messageClassAndType ('0508'O),
+  LIN4_BO_LAST                    messageLength,
+  IUA_Message_Header              header,
+  IUA_Release_Reason              releaseReason
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,header,releaseReason)"; 
+       }
+
+// IUA_RELEASE_CONFIRM
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_REL_CFM
+{
+  OCT1                            version  ('01'O),
+  OCT1                            reserved ('00'O),
+  OCT2                            messageClassAndType ('0509'O),
+  LIN4_BO_LAST                    messageLength,
+  IUA_Message_Header              header
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,header)"; 
+       }
+
+// IUA_RELEASE_INDICATION
+//++++++++++++++++++++++++++++++++++++++++++++++++++
+type record IUA_REL_IND
+{
+  OCT1                            version  ('01'O),
+  OCT1                            reserved ('00'O),
+  OCT2                            messageClassAndType ('050A'O),
+  LIN4_BO_LAST                    messageLength,
+  IUA_Message_Header              header,
+  IUA_Release_Reason              releaseReason
+} with { variant (messageLength) "LENGTHTO(version,reserved,messageClassAndType,
+                                           messageLength,header,releaseReason)"; 
+       }
+
+
+// Top level PDU
+//************************************************************************
+type union PDU_IUA
+{
+  IUA_ERR        iUA_ERR,        // Error
+  IUA_NTFY       iUA_NTFY,       // Notify 
+  IUA_TEIs_REQ   iUA_TEIs_REQ,   // TEI Status Request  
+  IUA_TEIs_CFM   iUA_TEIs_CFM,   // TEI Status Confirm  
+  IUA_TEIs_IND   iUA_TEIs_IND,   // TEI Status Indication  
+  IUA_TEIq_REQ   iUA_TEIq_REQ,   // TEI Query  Request 
+  IUA_ASPUP      iUA_ASPUP,      // ASP up
+  IUA_ASPDN      iUA_ASPDN,      // ASP down
+  IUA_BEAT       iUA_BEAT,       // Heartbeat
+  IUA_BEAT_Ack   iUA_BEAT_Ack,   // Heartbeat Ack
+  IUA_ASPUP_Ack  iUA_ASPUP_Ack,  // ASP up ack
+  IUA_ASPDN_Ack  iUA_ASPDN_Ack,  // ASP down ack
+  IUA_ASPAC      iUA_ASPAC,      // ASP Active
+  IUA_ASPIA      iUA_ASPIA,      // ASP Inactive
+  IUA_ASPAC_Ack  iUA_ASPAC_Ack,  // ASP Active Ack
+  IUA_ASPIA_Ack  iUA_ASPIA_Ack,  // ASP Inactive
+  IUA_DATA_REQ   iUA_DATA_REQ,   // Data Request
+  IUA_DATA_IND   iUA_DATA_IND,   // Data Indication
+  IUA_uDATA_REQ  iUA_uDATA_REQ,  // Unit Data Request
+  IUA_uDATA_IND  iUA_uDATA_IND,  // Unit Data Indication
+  IUA_EST_REQ    iUA_EST_REQ,    // Establish Request
+  IUA_EST_CFM    iUA_EST_CFM,    // Establish Confirmation
+  IUA_EST_IND    iUA_EST_IND,    // Establish Indication
+  IUA_REL_REQ    iUA_REL_REQ,    // Release Request
+  IUA_REL_CFM    iUA_REL_CFM,    // Release Confirmation
+  IUA_REL_IND    iUA_REL_IND     // Release Indication
+} with { variant "TAG(
+    iUA_ERR,        messageClassAndType = '0000'O;   //MGMT Class (0),
+    iUA_NTFY,       messageClassAndType = '0001'O;   //MGMT Class (0),
+    iUA_TEIs_REQ,   messageClassAndType = '0002'O;   //MGMT Class (0),
+    iUA_TEIs_CFM,   messageClassAndType = '0003'O;   //MGMT Class (0),
+    iUA_TEIs_IND,   messageClassAndType = '0004'O;   //MGMT Class (0),
+    iUA_TEIq_REQ,   messageClassAndType = '0005'O;   //MGMT Class (0),
+    iUA_ASPUP,      messageClassAndType = '0301'O;   //ASPSM Class(3),
+    iUA_ASPDN,      messageClassAndType = '0302'O;   //ASPSM Class(3),
+    iUA_BEAT,       messageClassAndType = '0303'O;   //ASPSM Class(3),
+    iUA_ASPUP_Ack,  messageClassAndType = '0304'O;   //ASPSM Class(3),
+    iUA_ASPDN_Ack,  messageClassAndType = '0305'O;   //ASPSM Class(3),
+    iUA_BEAT_Ack,   messageClassAndType = '0306'O;   //ASPSM Class(3),
+    iUA_ASPAC,      messageClassAndType = '0401'O;   //ASPTM Class(4),
+    iUA_ASPIA,      messageClassAndType = '0402'O;   //ASPTM Class(4),
+    iUA_ASPAC_Ack,  messageClassAndType = '0403'O;   //ASPTM Class(4),
+    iUA_ASPIA_Ack,  messageClassAndType = '0404'O;   //ASPTM Class(4),
+    iUA_DATA_REQ,   messageClassAndType = '0501'O;   //QPTM Class(5),
+    iUA_DATA_IND,   messageClassAndType = '0502'O;   //QPTM Class(5),
+    iUA_uDATA_REQ,  messageClassAndType = '0503'O;   //QPTM Class(5),
+    iUA_uDATA_IND,  messageClassAndType = '0504'O;   //QPTM Class(5),
+    iUA_EST_REQ,    messageClassAndType = '0505'O;   //QPTM Class(5),
+    iUA_EST_CFM,    messageClassAndType = '0506'O;   //QPTM Class(5),
+    iUA_EST_IND,    messageClassAndType = '0507'O;   //QPTM Class(5),
+    iUA_REL_REQ,    messageClassAndType = '0508'O;   //QPTM Class(5),
+    iUA_REL_CFM,    messageClassAndType = '0509'O;   //QPTM Class(5),
+    iUA_REL_IND,    messageClassAndType = '050A'O; )"//QPTM Class(5)
+       }
+} with {encode "RAW"}
