@@ -1,0 +1,121 @@
+---
+Author: Jenő Balaskó
+Version: 198 17-CNL 113 439, Rev. B
+Date: 2006-12-20
+
+---
+= IUA Protocol Modules for TTCN-3 Toolset with TITAN, User Guide
+:author: Jenő Balaskó
+:revnumber: 198 17-CNL 113 439, Rev. B
+:revdate: 2006-12-20
+:toc:
+
+== About This Document
+
+=== How to Read This Document
+
+This is the User Guide for the IUA protocol module. The IUA protocol module is developed for the TTCN-3 Toolset with TITAN. This document should be read together with Function Specification <<_3, [3]>>.
+
+=== Presumed Knowledge
+
+To use this protocol module the knowledge of the TTCN-3 language <<_1, [1]>> is essential.
+
+IUA is specified in the draft <<_4, [4]>>. A Function Specification was not available.
+
+== System Requirements
+
+Protocol modules are a set of TTCN-3 source code files that can be used as part of TTCN-3 test suites only. Hence, protocol modules alone do not put specific requirements on the system used. However in order to compile and execute a TTCN-3 test suite using the set of protocol modules the following system requirements must be satisfied:
+
+* TITAN TTCN-3 Test Executor R7A (1.7.pl0) or higher installed. For installation guide see <<_2, [2]>>. Please note: This version of the protocol module is not compatible with TITAN releases earlier than R7A.
+
+= Protocol Modules
+
+== Overview
+
+Protocol modules implement the messages structure of the related protocol in a formalized way, using the standard specification language TTCN-3. This allows defining of test data (templates) in the TTCN-3 language <<_1, [1]>> and correctly encoding/decoding messages when executing test suites using the Titan TTCN-3 test environment.
+
+Protocol modules are using Titan’s RAW encoding attributes <<_2, [2]>> and hence are usable with the Titan test toolset only.
+
+The table below contains the implemented messages and the corresponding TTCN-3 type records. Using those type records, templates can be defined to send and receive a given message.
+
+[cols=",,",options="header",]
+|======================================================================
+|Message name |Reference |Corresponding type record in *__IUA_Types.ttcn__*
+|Establish Request |<<_4, [4]>> 3.3.1.1 |IUA_EST_REQ
+|Establish Confirm |<<_4, [4]>> 3.3.1.1 |IUA_EST_CFM
+|Establish Indication |<<_4, [4]>> 3.3.1.1 |IUA_EST_IND
+|Release Request |<<_4, [4]>> 3.3.1.2 |IUA_REL_REQ
+|Release Confirm |<<_4, [4]>> 3.3.1.2 |IUA_REL_CFM
+|Release Indication |<<_4, [4]>> 3.3.1.2 |IUA_REL_IND
+|Data Request |<<_4, [4]>> 3.3.1.3 |IUA_DATA_REQ
+|Data Indication |<<_4, [4]>> 3.3.1.3 |IUA_DATA_IND
+|Unit Data Request |<<_4, [4]>> 3.3.1.4 |IUA_uDATA_REQ
+|Unit Data Indication |<<_4, [4]>> 3.3.1.4 |IUA_uDATA_IND
+|ASP Up |<<_4, [4]>> 3.3.2.1 |IUA_ASPUP
+|ASP Up Ack |<<_4, [4]>> 3.3.2.2 |IUA_ASPUP_Ack
+|ASP Down |<<_4, [4]>> 3.3.2.3 |IUA_ASPDN
+|ASP Down Ack |<<_4, [4]>> 3.3.2.4 |IUA_ASPDN_Ack
+|ASP Active |<<_4, [4]>> 3.3.2.5 |IUA_ASPAC
+|ASP Active Ack |<<_4, [4]>> 3.3.2.6 |IUA_ASPAC_Ack
+|ASP Inactive |<<_4, [4]>> 3.3.2.7 |IUA_ASPIA
+|ASP Inactive Ack |<<_4, [4]>> 3.3.2.8 |IUA_ASPIA_Ack
+|Heartbeat |<<_4, [4]>> 3.3.2.9 |IUA_BEAT
+|Heartbeat Ack |<<_4, [4]>> 3.3.2.10 |IUA_BEAT_Ack
+|Error |<<_4, [4]>> 3.3.3.1 |IUA_ERR
+|Notify |<<_4, [4]>> 3.3.3.2 |IUA_NTFY
+|TEI Status Request |<<_4, [4]>> 3.3.3.3 |IUA_TEIs_REQ
+|TEI Status Confirm |<<_4, [4]>> 3.3.3.3 |IUA_TEIs_CFM
+|TEI Status Indication |<<_4, [4]>> 3.3.3.3 |IUA_TEIs_IND
+|TEI Query message |<<_4, [4]>> 3.3.3.4 |IUA_TEIq_REQ
+|======================================================================
+
+== Installation
+
+The set of protocol modules can be used in developing TTCN-3 test suites using any text editor. However to make the work more efficient a TTCN-3-enabled text editor is recommended (for example, `nedit`, `xemacs`). Since the IUA protocol is used as a part of a TTCN-3 test suite, this requires TTCN-3 Test Executor be installed before the module can be compiled and executed together with other parts of the test suite. For more details on the installation of TTCN-3 Test Executor see the relevant section of <<_2, [2]>>.
+
+== Configuration
+
+None.
+
+= Example
+
+There are no examples available for this protocol module.
+
+= Terminology
+
+== Application Server Process (ASP)
+
+A process instance of an application Server. Examples of Application Server Processes are primary or backup MGC instances.
+
+= Abbreviations
+
+ASP:: Application Server Process
+
+ISDN:: Integrated Services Digital Network
+
+IUA:: ISDN User Application Layer Protocol
+
+MGC:: Media Gateway Controller
+
+PDU:: Protocol Data Unit
+
+TEI:: Terminal Endpoint Identifier
+
+TTCN-3:: Testing and Test Control Notation version 3
+
+= References
+
+[[_1]]
+[1] ETSI ES 201 873-1 v.2.2.1 (02/2003) +
+The Testing and Test Control Notation version 3. Part 1: Core Language
+
+[[_2]]
+[2] User Documentation for the TITAN TTCN-3 Test Executor
+
+[[_3]]
+[3] IUA Protocol Modules for TTCN-3 Toolset with TITAN, Function Specification
+
+[[_4]]
+[4] https://tools.ietf.org/html/draft-ietf-sigtran-rfc3057bis-02[draft-ietf-sigtran-rfc3057bis-02.txt] +
+ISDN Q.921-User Adaptation Layer
+
